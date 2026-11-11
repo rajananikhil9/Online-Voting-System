@@ -1,0 +1,304 @@
+{% extends "base.html" %}
+
+{% block title %}Candidate Registration | Student Voting System{% endblock %}
+
+{% block head %}
+
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/student_forms.css') }}">
+
+<style>
+    .registration-card {
+        max-width: 750px;
+        margin: 0 auto;
+    }
+
+    .form-info {
+        background: #eff6ff;
+        color: #1e40af;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 25px;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .required {
+        color: #dc2626;
+    }
+
+    .submit-button {
+        min-width: 190px;
+    }
+
+    .form-footer {
+        border-top: 1px solid #e2e8f0;
+        margin-top: 25px;
+        padding-top: 20px;
+    }
+
+    .position-info {
+        display: block;
+        margin-top: 8px;
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 30px 15px;
+    }
+
+    @media (max-width: 600px) {
+        .submit-button {
+            width: 100%;
+        }
+    }
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<section class="card registration-card">
+
+    <div class="page-header">
+        <h1>Register as a Candidate</h1>
+        <p>Student Portal | Candidate Registration</p>
+    </div>
+
+    <p class="description">
+        Apply to participate in an upcoming election.
+        Complete the form below and submit your application
+        for administrator approval.
+    </p>
+
+    <div class="form-info">
+        <strong>Important:</strong>
+        Your application will remain pending until the
+        administrator reviews and approves it.
+    </div>
+
+    {% if elections %}
+
+    <form method="POST"
+          action="{{ url_for('auth.candidate_application') }}">
+
+        <!-- SELECT ELECTION -->
+        <div class="form-group">
+
+            <label for="election_id">
+                Select Election <span class="required">*</span>
+            </label>
+
+            <select name="election_id"
+                    id="election_id"
+                    required>
+
+                <option value="">Choose Election</option>
+
+                {% for election in elections %}
+
+                    <option
+                        value="{{ election.id }}"
+                        data-positions="{{ election.available_positions | map(attribute='name') | list | tojson | forceescape }}">
+
+                        {{ election.title }}
+
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <!-- SELECT POSITION -->
+        <div class="form-group">
+
+            <label for="position">
+                Select Position <span class="required">*</span>
+            </label>
+
+            <select name="position"
+                    id="position"
+                    required
+                    disabled>
+
+                <option value="">Select an election first</option>
+
+            </select>
+
+            <small class="position-info" id="positionInfo">
+                Available positions will appear after selecting an election.
+            </small>
+
+        </div>
+
+
+        <!-- MANIFESTO -->
+        <div class="form-group">
+
+            <label for="manifesto">
+                Election Manifesto
+            </label>
+
+            <textarea
+                name="manifesto"
+                id="manifesto"
+                rows="6"
+                maxlength="2000"
+                placeholder="Explain your goals, plans, and why students should vote for you..."
+            ></textarea>
+
+            <small class="muted">
+                Describe your ideas and plans for the selected position.
+            </small>
+
+        </div>
+
+
+        <button type="submit"
+                class="button button-green submit-button"
+                id="submitButton"
+                disabled>
+
+            Submit Application
+
+        </button>
+
+    </form>
+
+    {% else %}
+
+    <div class="empty-state">
+
+        <h3>No Elections Available</h3>
+
+        <p>
+            There are currently no elections accepting
+            candidate applications. Please check again later.
+        </p>
+
+    </div>
+
+    {% endif %}
+
+
+    <div class="form-footer">
+
+        <div class="links">
+
+            <a href="{{ url_for('auth.my_candidate_applications') }}">
+                View My Applications
+            </a>
+
+            <a href="{{ url_for('auth.dashboard') }}">
+                Back to Dashboard
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const electionSelect = document.getElementById("election_id");
+    const positionSelect = document.getElementById("position");
+    const positionInfo = document.getElementById("positionInfo");
+    const submitButton = document.getElementById("submitButton");
+
+    if (!electionSelect || !positionSelect) {
+        return;
+    }
+
+    function updatePositions() {
+
+        positionSelect.innerHTML = "";
+
+        const selectedOption =
+            electionSelect.options[electionSelect.selectedIndex];
+
+        if (!electionSelect.value) {
+
+            positionSelect.disabled = true;
+
+            positionSelect.add(
+                new Option("Select an election first", "")
+            );
+
+            positionInfo.textContent =
+                "Available positions will appear after selecting an election.";
+
+            submitButton.disabled = true;
+
+            return;
+        }
+
+        let positions = [];
+
+        try {
+            positions = JSON.parse(
+                selectedOption.dataset.positions || "[]"
+            );
+        } catch (error) {
+            console.error("Unable to load election positions:", error);
+        }
+
+        if (!positions.length) {
+
+            positionSelect.disabled = true;
+
+            positionSelect.add(
+                new Option("No positions available", "")
+            );
+
+            positionInfo.textContent =
+                "The administrator has not configured positions for this election.";
+
+            submitButton.disabled = true;
+
+            return;
+        }
+
+        positionSelect.disabled = false;
+
+        positionSelect.add(
+            new Option("Choose Position", "")
+        );
+
+        positions.forEach(function (position) {
+
+            positionSelect.add(
+                new Option(position, position)
+            );
+
+        });
+
+        positionInfo.textContent =
+            positions.length + " position(s) available for this election.";
+
+        submitButton.disabled = true;
+    }
+
+
+    electionSelect.addEventListener("change", updatePositions);
+
+    positionSelect.addEventListener("change", function () {
+
+        submitButton.disabled = !positionSelect.value;
+
+    });
+
+    updatePositions();
+
+});
+</script>
+
+{% endblock %}

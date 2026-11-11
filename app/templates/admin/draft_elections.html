@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Draft Elections{% endblock %}
+
+{% block admin_content %}
+
+<style>
+    .draft-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .draft-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 22px;
+        margin-bottom: 18px;
+    }
+
+    .draft-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .draft-table th,
+    .draft-table td {
+        padding: 14px;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .draft-table th {
+        background: #f8fafc;
+        color: #475569;
+    }
+
+    .draft-badge {
+        background: #fef3c7;
+        color: #92400e;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .action-button {
+        display: inline-block;
+        padding: 7px 12px;
+        border-radius: 6px;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        font-size: 13px;
+        margin: 2px;
+    }
+
+    .edit-button {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .delete-button {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 45px 15px;
+        color: #64748b;
+    }
+
+    @media(max-width: 750px) {
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        .draft-table {
+            min-width: 750px;
+        }
+    }
+
+    .activate-button {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .activate-button:hover {
+        background: #bbf7d0;
+    }
+</style>
+
+<div class="draft-header">
+    <div>
+        <h2>Manage Draft Elections</h2>
+        <p class="muted">
+            View, edit and manage elections before activation.
+        </p>
+    </div>
+
+    <a href="{{ url_for('admin_dashboard.add_election_page') }}" class="button">
+        + Add Election
+    </a>
+</div>
+
+<div class="draft-card">
+
+    <div class="table-wrapper">
+
+        <table class="draft-table">
+
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Election Name</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for election in elections %}
+
+                <tr>
+                    <td>{{ election.id }}</td>
+
+                    <td>
+                        <strong>{{ election.title }}</strong>
+                    </td>
+
+                    <td>
+                        {{ election.start_at.strftime('%d %b %Y, %I:%M %p') }}
+                    </td>
+
+                    <td>
+                        {{ election.end_at.strftime('%d %b %Y, %I:%M %p') }}
+                    </td>
+
+                    <td>
+                        <span class="draft-badge">
+                            Draft
+                        </span>
+                    </td>
+
+                    <td>
+
+                        <a href="{{ url_for(
+        'admin_dashboard.edit_draft_election',
+        election_id=election.id
+    ) }}" class="action-button edit-button">
+                            Edit
+                        </a>
+
+                        <form method="POST" action="{{ url_for(
+              'admin_dashboard.activate_election',
+              election_id=election.id
+          ) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to activate this election?');">
+
+                            <button type="submit" class="action-button activate-button">
+                                Activate
+                            </button>
+
+                        </form>
+
+                        <form method="POST" action="{{ url_for(
+              'admin_dashboard.delete_draft_election',
+              election_id=election.id
+          ) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this election?');">
+
+                            <button type="submit" class="action-button delete-button">
+                                Delete
+                            </button>
+
+                        </form>
+
+                    </td>
+                </tr>
+
+                {% else %}
+
+                <tr>
+                    <td colspan="6">
+                        <div class="empty-state">
+                            <h3>No Draft Elections</h3>
+                            <p>Create a new election to get started.</p>
+                        </div>
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

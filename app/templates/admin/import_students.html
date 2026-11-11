@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+
+{% block title %}Import Students | Voting System{% endblock %}
+
+{% block head %}
+<style>
+    .import-header {
+        margin-bottom: 25px;
+    }
+
+    .import-header h1 {
+        color: #172554;
+        font-size: 28px;
+        margin-bottom: 8px;
+    }
+
+    .import-header p {
+        color: #64748b;
+        margin: 0;
+    }
+
+    .import-card {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+        max-width: 800px;
+    }
+
+    .upload-box {
+        border: 2px dashed #93c5fd;
+        background: #eff6ff;
+        border-radius: 12px;
+        padding: 40px 20px;
+        text-align: center;
+        margin: 25px 0;
+    }
+
+    .upload-icon {
+        font-size: 45px;
+        margin-bottom: 12px;
+    }
+
+    .upload-box h3 {
+        color: #1e3a8a;
+        margin-bottom: 8px;
+    }
+
+    .upload-box p {
+        color: #64748b;
+        font-size: 14px;
+    }
+
+    .file-input {
+        display: block;
+        margin: 20px auto 0;
+        max-width: 100%;
+    }
+
+    .import-button {
+        background: #2563eb;
+        color: white;
+        padding: 12px 22px;
+        border: none;
+        border-radius: 7px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .import-button:hover {
+        background: #1d4ed8;
+    }
+
+    .import-button:disabled {
+        background: #94a3b8;
+        cursor: not-allowed;
+    }
+
+    .result-box {
+        display: none;
+        margin-top: 22px;
+        padding: 18px;
+        border-radius: 8px;
+        background: #f1f5f9;
+        color: #334155;
+    }
+
+    .result-box.success {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .result-box.error {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .result-box ul {
+        padding-left: 20px;
+    }
+
+    .instructions {
+        margin-top: 25px;
+        padding: 18px;
+        background: #f8fafc;
+        border-radius: 8px;
+    }
+
+    .instructions h3 {
+        color: #172554;
+        margin-top: 0;
+    }
+
+    .instructions li {
+        color: #475569;
+        margin-bottom: 8px;
+    }
+
+    @media(max-width: 600px) {
+        .import-card {
+            padding: 18px;
+        }
+
+        .upload-box {
+            padding: 25px 12px;
+        }
+    }
+</style>
+{% endblock %}
+
+
+{% block admin_content %}
+
+<div class="import-header">
+    <h1>Import Students</h1>
+    <p>Upload an Excel file to register multiple students.</p>
+</div>
+
+<section class="import-card">
+
+    <form id="importForm" enctype="multipart/form-data">
+
+        <div class="upload-box">
+
+            <div class="upload-icon">📥</div>
+
+            <h3>Upload Student Excel File</h3>
+
+            <p>Select your .xlsx file to import student records.</p>
+
+            <input type="file" name="file" id="excelFile" class="file-input" accept=".xlsx" required>
+
+        </div>
+
+        <button type="submit" class="import-button" id="importButton">
+
+            Import Students
+
+        </button>
+
+    </form>
+
+    <div id="resultBox" class="result-box"></div>
+
+
+    <div class="instructions">
+
+        <h3>Instructions</h3>
+
+        <ul>
+            <li>Upload an Excel file in .xlsx format.</li>
+            <li>Make sure student registration numbers are correct.</li>
+            <li>Provide valid college email addresses.</li>
+            <li>Check the Excel column format expected by your import service.</li>
+            <li>Duplicate student records may be rejected.</li>
+        </ul>
+
+    </div>
+
+</section>
+
+
+<script>
+
+    const importForm = document.getElementById("importForm");
+    const excelFile = document.getElementById("excelFile");
+    const importButton = document.getElementById("importButton");
+    const resultBox = document.getElementById("resultBox");
+
+
+    importForm.addEventListener("submit", async function (event) {
+
+        event.preventDefault();
+
+        if (!excelFile.files.length) {
+            alert("Please select an Excel file.");
+            return;
+        }
+
+        const file = excelFile.files[0];
+
+        if (!file.name.toLowerCase().endsWith(".xlsx")) {
+            alert("Only .xlsx files are supported.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        importButton.disabled = true;
+        importButton.textContent = "Importing...";
+
+        resultBox.style.display = "block";
+        resultBox.className = "result-box";
+        resultBox.textContent = "Please wait. Importing students...";
+
+        try {
+
+            const response = await fetch(
+                "{{ url_for('student_import.import_students') }}",
+                {
+                    method: "POST",
+                    body: formData
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "Import failed.");
+            }
+
+            resultBox.className = "result-box success";
+
+            let html = `
+            <h3>Import Completed</h3>
+            <p>Students imported: <strong>${data.imported_count}</strong></p>
+            <p>Import errors: <strong>${data.error_count}</strong></p>
+        `;
+
+            if (data.errors && data.errors.length) {
+                html += "<h4>Import Errors</h4><ul>";
+
+                data.errors.forEach(error => {
+                    html += `<li>${escapeHtml(error)}</li>`;
+                });
+
+                html += "</ul>";
+            }
+
+            if (data.email_results && data.email_results.length) {
+
+                const sent = data.email_results.filter(
+                    item => item.status === "sent"
+                ).length;
+
+                const failed = data.email_results.filter(
+                    item => item.status === "failed"
+                ).length;
+
+                html += `
+                <h4>Email Results</h4>
+                <p>Emails sent: <strong>${sent}</strong></p>
+                <p>Emails failed: <strong>${failed}</strong></p>
+            `;
+            }
+
+            resultBox.innerHTML = html;
+
+        } catch (error) {
+
+            resultBox.className = "result-box error";
+            resultBox.textContent = error.message;
+
+        } finally {
+
+            importButton.disabled = false;
+            importButton.textContent = "Import Students";
+
+        }
+
+    });
+
+
+    function escapeHtml(value) {
+        const div = document.createElement("div");
+        div.textContent = String(value);
+        return div.innerHTML;
+    }
+
+
+</script>
+
+{% endblock %}

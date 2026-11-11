@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Draft Election{% endblock %}
+
+{% block admin_content %}
+
+<div class="card">
+
+    <h2>Edit Draft Election</h2>
+
+    <p class="muted">
+        Update the election information before activation.
+    </p>
+
+    <form method="POST"
+          action="{{ url_for(
+              'admin_dashboard.edit_draft_election',
+              election_id=election.id
+          ) }}">
+
+        <label>Election Title</label>
+
+        <input type="text"
+               name="title"
+               value="{{ election.title }}"
+               required
+               style="width:100%; padding:12px; margin:10px 0 20px;">
+
+        <label>Description</label>
+
+        <textarea name="description"
+                  rows="4"
+                  style="width:100%; padding:12px; margin:10px 0 20px;">{{ election.description or '' }}</textarea>
+
+        <label>Start Date and Time</label>
+
+        <input type="datetime-local"
+               name="start_at"
+               value="{{ election.start_at.strftime('%Y-%m-%dT%H:%M') }}"
+               required
+               style="width:100%; padding:12px; margin:10px 0 20px;">
+
+        <label>End Date and Time</label>
+
+        <input type="datetime-local"
+               name="end_at"
+               value="{{ election.end_at.strftime('%Y-%m-%dT%H:%M') }}"
+               required
+               style="width:100%; padding:12px; margin:10px 0 20px;">
+
+        <button type="submit" class="button">
+            Save Changes
+        </button>
+
+        <a href="{{ url_for('admin_dashboard.manage_draft_elections') }}"
+           class="button button-secondary">
+            Cancel
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}

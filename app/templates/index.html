@@ -1,0 +1,189 @@
+
+{% extends "base.html" %}
+
+{% block title %}Home | Student Voting System{% endblock %}
+
+{% block head %}
+<style>
+    .hero {
+        background: linear-gradient(135deg, #172554, #2563eb);
+        color: white;
+        padding: 65px 35px;
+        border-radius: 18px;
+        text-align: center;
+    }
+
+    .hero h1 {
+        font-size: clamp(30px, 5vw, 48px);
+        line-height: 1.2;
+        margin: 0 0 18px;
+    }
+
+    .hero p {
+        max-width: 700px;
+        margin: 0 auto 25px;
+        color: #dbeafe;
+        font-size: 17px;
+    }
+
+    .hero-actions {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .hero .button {
+        background: white;
+        color: #1e3a8a;
+        font-weight: bold;
+    }
+
+    .hero .button:hover {
+        background: #dbeafe;
+    }
+
+    .section-heading {
+        text-align: center;
+        margin: 45px 0 24px;
+    }
+
+    .section-heading h2 {
+        margin-bottom: 8px;
+        font-size: 28px;
+    }
+
+    .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 18px;
+        margin-bottom: 35px;
+    }
+
+    .feature-card {
+        background: white;
+        padding: 24px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .feature-icon {
+        font-size: 30px;
+        margin-bottom: 10px;
+    }
+
+    .feature-card h3 {
+        margin: 0 0 10px;
+    }
+
+    .feature-card p {
+        color: #64748b;
+        margin-bottom: 0;
+    }
+
+    .cta {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        text-align: center;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 25px;
+    }
+
+    @media (max-width: 600px) {
+        .hero {
+            padding: 42px 20px;
+        }
+
+        .hero p {
+            font-size: 15px;
+        }
+
+        .section-heading h2 {
+            font-size: 24px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block public_content %}
+
+<section class="hero">
+    <h1>Welcome to the Student Voting System</h1>
+
+    <p>
+        A convenient platform for eligible students to participate in
+        college elections. Review candidates, cast your vote, and follow
+        election updates through your student account.
+    </p>
+
+    <div class="hero-actions">
+        <a href="{{ url_for('auth.login') }}" class="button">
+            Student Login
+        </a>
+    </div>
+</section>
+
+<section>
+    <div class="section-heading">
+        <h2>Platform Features</h2>
+        <p class="muted">
+            Designed to support an organized college election process.
+        </p>
+    </div>
+
+    <div class="feature-grid">
+
+        <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">🔐</div>
+            <h3>Secure Access</h3>
+            <p>
+                Students sign in with their registration credentials
+                to access their accounts.
+            </p>
+        </article>
+
+        <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">🗳️</div>
+            <h3>Student Voting</h3>
+            <p>
+                Eligible students can review candidates and vote
+                during an active election.
+            </p>
+        </article>
+
+        <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">📊</div>
+            <h3>Election Results</h3>
+            <p>
+                View election results when they are made available
+                by the system.
+            </p>
+        </article>
+
+        <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">📱</div>
+            <h3>Easy to Use</h3>
+            <p>
+                Access the platform from a computer, tablet,
+                or mobile browser.
+            </p>
+        </article>
+
+    </div>
+</section>
+
+<section class="cta">
+    <h2>Ready to participate?</h2>
+
+    <p class="muted">
+        Sign in to check your eligibility and view available elections.
+    </p>
+
+    <a href="{{ url_for('auth.login') }}" class="button">
+        Continue to Login
+    </a>
+</section>
+
+{% endblock %}
+

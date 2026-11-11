@@ -1,0 +1,389 @@
+{% extends "base.html" %}
+
+{% block title %}Student Voting | Student Voting System{% endblock %}
+
+{% block head %}
+<style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        .voting-page {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .voting-page-header {
+            background: #172554;
+            color: white;
+            padding: 24px 7%;
+        }
+
+        .voting-page-header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .voting-page-header p {
+            margin-bottom: 0;
+            color: #cbd5e1;
+        }
+
+        .voting-main {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 24px;
+            margin-bottom: 22px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(15, 23, 42, 0.06);
+        }
+
+        .election-card {
+            border: 1px solid #e2e8f0;
+        }
+
+        .position-card {
+            border: 1px solid #e2e8f0;
+            padding: 18px;
+            margin-top: 20px;
+            border-radius: 10px;
+            background: #ffffff;
+        }
+
+        .position-card h4 {
+            margin-top: 0;
+            font-size: 18px;
+            color: #172554;
+        }
+
+        .candidate {
+            display: block;
+            padding: 15px;
+            margin: 12px 0;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .candidate:hover {
+            background: #eff6ff;
+            border-color: #60a5fa;
+        }
+
+        .candidate input {
+            margin-right: 10px;
+            accent-color: #2563eb;
+        }
+
+        .candidate-name {
+            font-weight: bold;
+        }
+
+        .candidate-manifesto {
+            margin: 8px 0 0 25px;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+        }
+
+        button,
+        .results-button {
+            display: inline-block;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            padding: 12px 18px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            margin-top: 10px;
+        }
+
+        button:hover,
+        .results-button:hover {
+            background: #1d4ed8;
+        }
+
+        .message {
+            padding: 13px 16px;
+            margin-bottom: 16px;
+            border-radius: 7px;
+            line-height: 1.5;
+        }
+
+        .success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .muted {
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        .election-status {
+            display: inline-block;
+            padding: 6px 11px;
+            border-radius: 20px;
+            background: #dbeafe;
+            color: #1d4ed8;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .voted-status {
+            color: #15803d;
+            font-weight: bold;
+            line-height: 1.6;
+        }
+
+        .closed-status {
+            color: #b45309;
+            font-weight: bold;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px 15px;
+        }
+
+        .empty-state h3 {
+            color: #475569;
+        }
+
+        .election-description {
+            white-space: pre-line;
+            overflow-wrap: anywhere;
+        }
+
+        @media (max-width: 600px) {
+            .voting-page-header {
+                padding: 20px;
+            }
+
+            .voting-page-header h1 {
+                font-size: 23px;
+            }
+
+            .voting-main {
+                padding: 0 12px;
+                margin-top: 18px;
+            }
+
+            .card {
+                padding: 17px;
+            }
+
+            .position-card {
+                padding: 14px;
+            }
+
+            button,
+            .results-button {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="voting-page">
+    <main class="voting-main">
+<header class="voting-page-header">
+    <h1>Student Voting System</h1>
+    <p>Student Voting Portal</p>
+</header>
+
+<!-- Elections -->
+        <section class="card">
+
+            <h2>Available Elections</h2>
+
+            <p class="muted">
+                Select one candidate for each position. After your vote is
+                recorded, you cannot change it. You can vote for other
+                positions in the same election.
+            </p>
+
+            {% if election_data %}
+
+                {% for item in election_data %}
+
+                    <article class="card election-card">
+
+                        <h3>{{ item.election.title }}</h3>
+
+                        <p class="election-description">
+                            {{ item.election.description or "No description provided." }}
+                        </p>
+
+                        <p>
+                            <span class="election-status">
+                                {{ "Completed" if item.is_completed else "Voting Open" }}
+                            </span>
+                        </p>
+
+                        <!-- Completed Election -->
+                        {% if item.is_completed %}
+
+                            <p class="closed-status">
+                                Voting has ended for this election.
+                            </p>
+
+                            <a
+                                class="results-button"
+                                href="{{ url_for(
+                                    'results.election_results',
+                                    election_id=item.election.id
+                                ) }}"
+                            >
+                                View Results
+                            </a>
+
+                        <!-- Open Election -->
+                        {% elif item.is_voting_open %}
+
+                            {% if item.candidates %}
+
+                                {% set positions = item.candidates
+                                    | map(attribute='position')
+                                    | unique
+                                    | list
+                                %}
+
+                                {% for position in positions %}
+
+                                    {% set position_candidates = item.candidates
+                                        | selectattr('position', 'equalto', position)
+                                        | list
+                                    %}
+
+                                    <section class="position-card">
+
+                                        <h4>{{ position }}</h4>
+
+                                        <!-- Already Voted -->
+                                        {% if position in item.voted_positions %}
+
+                                            <p class="voted-status">
+                                                &#10003; Your vote for {{ position }}
+                                                has been recorded.
+                                            </p>
+
+                                        <!-- Not Yet Voted -->
+                                        {% else %}
+
+                                            {% if position_candidates %}
+
+                                                <form
+                                                    method="POST"
+                                                    action="{{ url_for(
+                                                        'voting.cast_vote',
+                                                        election_id=item.election.id
+                                                    ) }}"
+                                                    onsubmit="return confirm(
+                                                        'Are you sure you want to vote for this candidate for {{ position }}? Your choice cannot be changed afterward.'
+                                                    );"
+                                                >
+
+                                                    <input
+                                                        type="hidden"
+                                                        name="position"
+                                                        value="{{ position }}"
+                                                    >
+
+                                                    {% for candidate in position_candidates %}
+
+                                                        <label class="candidate">
+
+                                                            <input
+                                                                type="radio"
+                                                                name="candidate_id"
+                                                                value="{{ candidate.id }}"
+                                                                required
+                                                            >
+
+                                                            <span class="candidate-name">
+                                                                {{ candidate.name }}
+                                                            </span>
+
+                                                            {% if candidate.manifesto %}
+
+                                                                <p class="muted candidate-manifesto">
+                                                                    {{ candidate.manifesto }}
+                                                                </p>
+
+                                                            {% endif %}
+
+                                                        </label>
+
+                                                    {% endfor %}
+
+                                                    <button type="submit">
+                                                        Vote for {{ position }}
+                                                    </button>
+
+                                                </form>
+
+                                            {% else %}
+
+                                                <p class="muted">
+                                                    No candidates are available for
+                                                    this position.
+                                                </p>
+
+                                            {% endif %}
+
+                                        {% endif %}
+
+                                    </section>
+
+                                {% endfor %}
+
+                            {% else %}
+
+                                <p class="muted">
+                                    No candidates have been added to this election yet.
+                                </p>
+
+                            {% endif %}
+
+                        {% endif %}
+
+                    </article>
+
+                {% endfor %}
+
+            {% else %}
+
+                <div class="empty-state">
+                    <h3>No Elections Available</h3>
+
+                    <p class="muted">
+                        There are currently no eligible elections available
+                        for your account. Please check again later.
+                    </p>
+                </div>
+
+            {% endif %}
+
+        </section>
+    </main>
+</div>
+{% endblock %}

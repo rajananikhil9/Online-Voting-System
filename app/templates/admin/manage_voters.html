@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Voters | Student Voting System{% endblock %}
+
+{% block head %}
+<style>
+.manage-voters-page {
+    max-width: 1250px;
+    margin: auto;
+    padding: 35px 20px 45px;
+    color: #1e293b;
+}
+.voters-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 26px;
+}
+.voters-header h2 {
+    margin: 0 0 7px;
+    color: #172554;
+    font-size: 29px;
+    font-weight: 750;
+}
+.voters-header p {
+    margin: 0;
+    color: #64748b;
+}
+.voters-card {
+    margin-bottom: 25px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 5px 20px rgba(15, 23, 42, .06);
+}
+.voters-card-header {
+    padding: 19px 23px;
+    border-bottom: 1px solid #e2e8f0;
+    background: linear-gradient(135deg, #f8fafc, #eff6ff);
+}
+.voters-card-header h5 {
+    margin: 0;
+    color: #172554;
+    font-size: 17px;
+    font-weight: 700;
+}
+.voters-card-body { padding: 24px; }
+.voters-label {
+    display: block;
+    margin-bottom: 8px;
+    color: #334155;
+    font-size: 14px;
+    font-weight: 650;
+}
+.voters-select, .voters-search {
+    width: 100%;
+    min-height: 45px;
+    box-sizing: border-box;
+    padding: 11px 13px;
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+    background: #fff;
+    color: #0f172a;
+    font: inherit;
+}
+.voters-select:focus, .voters-search:focus {
+    border-color: #3b82f6;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(59,130,246,.12);
+}
+.voters-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+.voters-toolbar .voters-search { max-width: 340px; }
+.voters-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 650;
+    text-decoration: none;
+    cursor: pointer;
+}
+.voters-btn-primary { background: #2563eb; color: #fff; }
+.voters-btn-primary:hover { background: #1d4ed8; color: #fff; }
+.voters-btn-secondary { background: #fff; color: #334155; border-color: #cbd5e1; }
+.voters-btn-secondary:hover { background: #f1f5f9; color: #1e293b; }
+.voters-notice {
+    padding: 15px 17px;
+    border: 1px solid #fde68a;
+    border-radius: 9px;
+    background: #fffbeb;
+    color: #92400e;
+}
+.voters-table-wrap { width: 100%; overflow-x: auto; }
+.voters-table { width: 100%; border-collapse: collapse; text-align: left; }
+.voters-table th {
+    padding: 14px;
+    background: #f1f5f9;
+    color: #475569;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 12px;
+    font-weight: 750;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+.voters-table td {
+    padding: 14px;
+    color: #334155;
+    border-bottom: 1px solid #edf2f7;
+    font-size: 14px;
+    vertical-align: middle;
+}
+.voters-table tbody tr:hover { background: #eff6ff; }
+.voter-name { color: #172554; font-weight: 700; }
+.voter-status {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 20px;
+    background: #dcfce7;
+    color: #166534;
+    font-size: 12px;
+    font-weight: 700;
+}
+.voter-status-voted { background: #dbeafe; color: #1d4ed8; }
+.voters-checkbox { width: 17px; height: 17px; cursor: pointer; }
+.voters-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    margin-top: 20px;
+}
+.voters-muted { color: #64748b; font-size: 13px; }
+.voters-empty { padding: 28px 12px; color: #64748b; text-align: center; }
+@media (max-width: 700px) {
+    .manage-voters-page { padding: 22px 13px 35px; }
+    .voters-header, .voters-toolbar, .voters-footer {
+        align-items: stretch;
+        flex-direction: column;
+    }
+    .voters-header h2 { font-size: 24px; }
+    .voters-card-body { padding: 17px; }
+    .voters-toolbar .voters-search { max-width: none; }
+}
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="manage-voters-page">
+    <div class="voters-header">
+        <div>
+            <h2>Manage Voters</h2>
+            <p>Choose which registered students are eligible to vote in an election.</p>
+        </div>
+        <a href="{{ url_for('admin_dashboard.dashboard') }}"
+           class="voters-btn voters-btn-secondary">Back to Dashboard</a>
+    </div>
+
+    <div class="voters-card">
+        <div class="voters-card-header">
+            <h5>Select Election</h5>
+        </div>
+        <div class="voters-card-body">
+            {% if elections %}
+                <label class="voters-label" for="electionSelector">Election</label>
+                <select class="voters-select" id="electionSelector">
+                    <option value="">Choose an election</option>
+                    {% for election in elections %}
+                    <option value="{{ election.id }}"
+                        {% if selected_election and selected_election.id == election.id %}selected{% endif %}>
+                        {{ election.title }} — {{ election.status|title }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <p class="voters-muted" style="margin:10px 0 0;">
+                    Voter eligibility can only be changed while an election is in draft.
+                </p>
+            {% else %}
+                <div class="voters-notice">No elections are available. Create an election first.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if selected_election %}
+    <div class="voters-card">
+        <div class="voters-card-header">
+            <h5>Assign Voter Eligibility — {{ selected_election.title }}</h5>
+        </div>
+        <div class="voters-card-body">
+            {% if selected_election.status != "draft" %}
+                <div class="voters-notice">
+                    This election is {{ selected_election.status }}. Voter eligibility is locked.
+                </div>
+            {% elif students %}
+                <form method="POST"
+                      action="{{ url_for('admin_dashboard.assign_students', election_id=selected_election.id) }}"
+                      id="voterAssignmentForm">
+                    <div class="voters-toolbar">
+                        <input type="search" class="voters-search" id="studentSearch"
+                               placeholder="Search by name, registration number, or department..."
+                               aria-label="Search students">
+                        <span class="voters-muted">{{ students|length }} registered student(s)</span>
+                    </div>
+
+                    <div class="voters-table-wrap">
+                        <table class="voters-table" id="studentsTable">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <input type="checkbox" class="voters-checkbox"
+                                               id="selectAll" aria-label="Select all visible students">
+                                    </th>
+                                    <th>#</th>
+                                    <th>Student</th>
+                                    <th>Registration No.</th>
+                                    <th>Department</th>
+                                    <th>Eligibility</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in students %}
+                                {% set is_eligible = student.id in eligible_student_ids %}
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" class="voters-checkbox student-checkbox"
+                                               name="student_ids" value="{{ student.id }}"
+                                               {% if is_eligible %}checked{% endif %}>
+                                    </td>
+                                    <td>{{ loop.index }}</td>
+                                    <td><span class="voter-name">{{ student.name }}</span></td>
+                                    <td>{{ student.reg_no }}</td>
+                                    <td>{{ student.department or "—" }}</td>
+                                    <td>
+                                        {% if is_eligible %}
+                                            <span class="voter-status">Eligible</span>
+                                        {% else %}
+                                            <span class="voters-muted">Not assigned</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="voters-footer">
+                        <span class="voters-muted">
+                            Select students and save. Existing eligibility assignments are retained.
+                        </span>
+                        <button type="submit" class="voters-btn voters-btn-primary">
+                            Save Voter Eligibility
+                        </button>
+                    </div>
+                </form>
+            {% else %}
+                <div class="voters-empty">
+                    No registered students found. Import students before assigning voter eligibility.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    {% elif elections %}
+    <div class="voters-notice">Select an election above to manage its eligible voters.</div>
+    {% endif %}
+</div>
+
+<script>
+(function () {
+    const electionSelector = document.getElementById("electionSelector");
+    if (electionSelector) {
+        electionSelector.addEventListener("change", function () {
+            const url = new URL(window.location.href);
+            if (this.value) {
+                url.searchParams.set("election_id", this.value);
+            } else {
+                url.searchParams.delete("election_id");
+            }
+            window.location.href = url.toString();
+        });
+    }
+
+    const search = document.getElementById("studentSearch");
+    const table = document.getElementById("studentsTable");
+    if (search && table) {
+        search.addEventListener("input", function () {
+            const term = this.value.toLowerCase().trim();
+            table.querySelectorAll("tbody tr").forEach(function (row) {
+                row.hidden = !row.textContent.toLowerCase().includes(term);
+            });
+        });
+    }
+
+    const selectAll = document.getElementById("selectAll");
+    if (selectAll && table) {
+        selectAll.addEventListener("change", function () {
+            table.querySelectorAll("tbody tr").forEach(function (row) {
+                if (!row.hidden) {
+                    const checkbox = row.querySelector(".student-checkbox");
+                    if (checkbox) checkbox.checked = this.checked;
+                }
+            }, this);
+        });
+    }
+})();
+</script>
+{% endblock %}

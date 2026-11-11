@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+
+{% block title %}Add Election | Voting System{% endblock %}
+
+{% block head %}
+<style>
+    .add-election-page {
+        color: #1e293b;
+    }
+
+    .add-election-page h2 {
+        margin: 0 0 8px;
+        font-size: 28px;
+    }
+
+    .add-election-page .subtitle {
+        color: #64748b;
+        margin: 0 0 24px;
+    }
+
+    .add-election-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 28px;
+        box-shadow: 0 4px 18px rgba(15, 23, 42, .06);
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid #cbd5e1;
+        border-radius: 9px;
+        padding: 12px 14px;
+        font: inherit;
+        color: #1e293b;
+        background: #fff;
+    }
+
+    .form-group textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .date-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+    }
+
+    .positions-section {
+        margin: 25px 0;
+    }
+
+    .positions-section h3 {
+        font-size: 18px;
+        margin: 0 0 6px;
+        color: #1e293b;
+    }
+
+    .positions-description {
+        color: #64748b;
+        font-size: 14px;
+        margin-bottom: 16px;
+    }
+
+    .positions-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .position-option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 9px;
+        background: #f8fafc;
+        cursor: pointer;
+        transition: .2s;
+    }
+
+    .position-option:hover {
+        border-color: #2563eb;
+        background: #eff6ff;
+    }
+
+    .position-option input {
+        width: 17px;
+        height: 17px;
+        accent-color: #2563eb;
+        cursor: pointer;
+    }
+
+    .position-option span {
+        font-weight: 500;
+        color: #334155;
+    }
+
+    .position-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 14px;
+    }
+
+    .position-actions button {
+        border: none;
+        background: none;
+        color: #2563eb;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 0;
+    }
+
+    .primary-button {
+        border: 0;
+        border-radius: 9px;
+        padding: 12px 20px;
+        background: #2563eb;
+        color: #fff;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .primary-button:hover {
+        background: #1d4ed8;
+    }
+
+    @media (max-width: 650px) {
+        .add-election-card {
+            padding: 18px;
+        }
+
+        .date-grid,
+        .positions-grid {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+
+        .add-election-page h2 {
+            font-size: 23px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="add-election-page">
+
+    <h2>Create Election</h2>
+    <p class="subtitle">
+        Add a new election, configure its schedule, and select available positions.
+    </p>
+
+    <section class="add-election-card">
+
+        <form method="POST" action="{{ url_for('admin_dashboard.create_election') }}">
+
+            <!-- Election Title -->
+            <div class="form-group">
+                <label for="title">Election Title *</label>
+                <input type="text" id="title" name="title" required maxlength="150" placeholder="Enter election title">
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description"
+                    placeholder="Describe the purpose of this election"></textarea>
+            </div>
+
+            <!-- Election Dates -->
+            <div class="date-grid">
+
+                <div class="form-group">
+                    <label for="start_at">Start Date and Time *</label>
+                    <input type="datetime-local" id="start_at" name="start_at" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="end_at">End Date and Time *</label>
+                    <input type="datetime-local" id="end_at" name="end_at" required>
+                </div>
+
+            </div>
+
+            <!-- Election Positions -->
+            <div class="positions-section">
+
+                <h3>Select Election Positions *</h3>
+
+                <p class="positions-description">
+                    Select the positions available in this election.
+                    Students can apply only for the selected positions.
+                </p>
+
+                <div class="positions-grid">
+
+                    <label class="position-option">
+                        <input type="checkbox" name="positions" value="President">
+                        <span>President</span>
+                    </label>
+
+                    <label class="position-option">
+                        <input type="checkbox" name="positions" value="Vice President">
+                        <span>Vice President</span>
+                    </label>
+
+                    <label class="position-option">
+                        <input type="checkbox" name="positions" value="General Secretary">
+                        <span>General Secretary</span>
+                    </label>
+
+                    <label class="position-option">
+                        <input type="checkbox" name="positions" value="Secretary">
+                        <span>Secretary</span>
+                    </label>
+
+                    <label class="position-option">
+                        <input type="checkbox" name="positions" value="Joint Secretary">
+                        <span>Joint Secretary</span>
+                    </label>
+
+                    <label class="position-option">
+                        <input type="checkbox" name="positions" value="Treasurer">
+                        <span>Treasurer</span>
+                    </label>
+
+                    <label class="position-option">
+                        <input type="checkbox" name="positions" value="Sports Secretary">
+                        <span>Sports Secretary</span>
+                    </label>
+
+                </div>
+
+                <div class="position-actions">
+                    <button type="button" onclick="selectAllPositions()">
+                        Select All
+                    </button>
+
+                    <button type="button" onclick="clearAllPositions()">
+                        Clear All
+                    </button>
+                </div>
+
+            </div>
+
+            <button class="primary-button" type="submit">
+                Create Election
+            </button>
+
+        </form>
+
+    </section>
+</div>
+
+<script>
+    function selectAllPositions() {
+        document.querySelectorAll('input[name="positions"]').forEach(input => {
+            input.checked = true;
+        });
+    }
+
+    function clearAllPositions() {
+        document.querySelectorAll('input[name="positions"]').forEach(input => {
+            input.checked = false;
+        });
+    }
+
+    document.querySelector('form').addEventListener('submit', function (event) {
+        const selected = document.querySelectorAll(
+            'input[name="positions"]:checked'
+        );
+
+        if (selected.length === 0) {
+            event.preventDefault();
+            alert('Please select at least one election position.');
+        }
+    });
+</script>
+{% endblock %}

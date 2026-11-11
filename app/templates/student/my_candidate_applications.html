@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}My Applications | Student Voting System{% endblock %}
+
+{% block head %}
+
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/student_forms.css') }}">
+
+<style>
+    .applications-card {
+        width: 100%;
+    }
+
+    .application-count {
+        display: inline-block;
+        padding: 7px 13px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 20px;
+    }
+
+    .table-wrapper {
+        margin-top: 10px;
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .manifesto-cell {
+        max-width: 280px;
+        min-width: 180px;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+
+    .status {
+        display: inline-block;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .status.pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status.approved {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status.rejected {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .form-footer {
+        border-top: 1px solid #e2e8f0;
+        margin-top: 25px;
+        padding-top: 20px;
+    }
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+<section class="card applications-card">
+
+<div class="page-header">
+    <h1>My Candidate Applications</h1>
+    <p>Student Portal | Application Status</p>
+</div>
+
+<p class="description">
+    View and track the status of your candidate registration
+    applications. You can check whether your application
+    is pending, approved, or rejected.
+</p>
+
+{% if applications %}
+
+    <div class="application-count">
+        Total Applications: {{ applications|length }}
+    </div>
+
+    <div class="table-wrapper">
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Application ID</th>
+                    <th>Election</th>
+                    <th>Position</th>
+                    <th>Manifesto</th>
+                    <th>Status</th>
+                    <th>Applied On</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for application in applications %}
+                    <tr>
+
+                        <td>
+                            #{{ application.id }}
+                        </td>
+
+                        <td>
+                            Election #{{ application.election_id }}
+                        </td>
+
+                        <td>
+                            <strong>{{ application.position }}</strong>
+                        </td>
+
+                        <td class="manifesto-cell">
+                            {{ application.manifesto or "No manifesto provided" }}
+                        </td>
+
+                        <td>
+                            <span class="status {{ application.status|lower }}">
+                                {{ application.status|capitalize }}
+                            </span>
+                        </td>
+
+                        <td>
+                            {{ application.applied_at.strftime('%d-%m-%Y') if application.applied_at else "-" }}
+                        </td>
+
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+
+{% else %}
+
+    <div class="empty-state">
+        <h3>No Applications Yet</h3>
+
+        <p>
+            You haven't submitted any candidate applications.
+            Apply for an eligible election to get started.
+        </p>
+
+        <a href="{{ url_for('auth.candidate_application') }}"
+           class="button button-green">
+            Register as Candidate
+        </a>
+    </div>
+
+{% endif %}
+
+<div class="form-footer">
+    <div class="links">
+
+        <a href="{{ url_for('auth.candidate_application') }}">
+            Register as Candidate
+        </a>
+
+        <a href="{{ url_for('auth.dashboard') }}">
+            Back to Dashboard
+        </a>
+
+    </div>
+</div>
+
+
+</section>
+
+{% endblock %}

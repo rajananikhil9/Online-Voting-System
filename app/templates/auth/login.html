@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Login | Student Voting System</title>
+
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f1f5f9;
+            font-family: Arial, sans-serif;
+        }
+
+        .login-card {
+            width: 350px;
+            max-width: calc(100% - 64px);
+            padding: 32px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            margin-bottom: 8px;
+            text-align: center;
+            color: #1e293b;
+        }
+
+        .subtitle {
+            margin-bottom: 28px;
+            text-align: center;
+            color: #64748b;
+        }
+
+        label {
+            display: block;
+            margin: 16px 0 8px;
+            color: #334155;
+        }
+
+        input {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 24px;
+            padding: 13px;
+            border: 0;
+            border-radius: 8px;
+            background: #2563eb;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .message {
+            padding: 10px;
+            border-radius: 6px;
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .back-home-btn {
+            display: block;
+            width: 100%;
+            margin-top: 15px;
+            padding: 12px;
+            text-align: center;
+            background: #f1f5f9;
+            color: #1e3a8a;
+            border: 1px solid #cbd5e1;
+            border-radius: 7px;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            box-sizing: border-box;
+            transition: 0.2s;
+        }
+
+        .back-home-btn:hover {
+            background: #e2e8f0;
+            color: #1d4ed8;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="login-card">
+        <h1>Welcome Back</h1>
+        <p class="subtitle">College Student Voting System</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+        <p class="message">{{ message }}</p>
+        {% endfor %}
+        {% endwith %}
+
+        <form method="POST">
+            <label for="reg_no">Registration Number</label>
+            <input id="reg_no" name="reg_no" type="text" autocomplete="username" required>
+
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" autocomplete="current-password" required>
+
+            <button type="submit">Login</button>
+            <a href="/" class="back-home-btn">
+                ← Back to Home
+            </a>
+        </form>
+    </main>
+</body>
+
+</html>

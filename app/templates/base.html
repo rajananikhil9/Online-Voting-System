@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}Student Voting System{% endblock %}</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e3a8a;
+            --background: #f1f5f9;
+            --surface: #ffffff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --sidebar-width: 255px;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        /* =========================================
+           HEADER
+        ========================================= */
+
+        .site-header {
+            min-height: 72px;
+            background: var(--primary-dark);
+            color: white;
+            padding: 0 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .brand {
+            color: white;
+            font-size: 21px;
+            font-weight: bold;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .student-name {
+            color: #dbeafe;
+            font-size: 14px;
+        }
+
+        .logout-button {
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            padding: 10px 18px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .logout-button:hover {
+            background: #b91c1c;
+        }
+
+        /* =========================================
+           NAVIGATION BUTTONS
+        ========================================= */
+
+        .navbar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 0;
+            background: transparent;
+        }
+
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-width: 120px;
+            padding: 10px 18px;
+            border-radius: 9px;
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.2;
+            white-space: nowrap;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+            transition: background 0.25s ease,
+                        color 0.25s ease,
+                        transform 0.25s ease,
+                        box-shadow 0.25s ease;
+        }
+
+        .nav-btn:focus-visible {
+            outline: 3px solid #93c5fd;
+            outline-offset: 3px;
+        }
+
+        /* Home Button */
+
+        .home-btn {
+            color: white;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        .home-btn:hover {
+            background: white;
+            color: #1e3a8a;
+            transform: translateY(-2px);
+        }
+
+        /* Student Login Button */
+
+        .student-btn {
+            background: white;
+            color: #1e3a8a;
+            border: 1px solid white;
+        }
+
+        .student-btn:hover {
+            background: #dbeafe;
+            transform: translateY(-2px);
+        }
+
+        /* Admin Login Button */
+
+        .admin-btn {
+            background: #f59e0b;
+            color: #172554;
+            border: 1px solid #f59e0b;
+        }
+
+        .admin-btn:hover {
+            background: #fbbf24;
+            transform: translateY(-2px);
+        }
+
+        /* =========================================
+           STUDENT SIDEBAR
+        ========================================= */
+
+        .student-layout {
+            display: flex;
+            min-height: calc(100vh - 72px);
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            background: #ffffff;
+            border-right: 1px solid var(--border);
+            padding: 25px 15px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-heading {
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 1.2px;
+            padding: 0 15px;
+            margin-bottom: 15px;
+        }
+
+        .sidebar-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            border-radius: 8px;
+            color: #475569;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        .sidebar-menu a:hover {
+            background: #eff6ff;
+            color: var(--primary);
+        }
+
+        .sidebar-menu a.active {
+            background: #dbeafe;
+            color: #1d4ed8;
+            font-weight: bold;
+        }
+
+        .menu-icon {
+            width: 22px;
+            text-align: center;
+            font-size: 17px;
+        }
+
+        /* =========================================
+           ADMIN LAYOUT
+        ========================================= */
+
+        .admin-layout {
+            display: grid;
+            grid-template-columns: 245px minmax(0, 1fr);
+            gap: 22px;
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 28px 20px;
+            min-height: calc(100vh - 72px);
+            align-items: start;
+        }
+
+        .admin-sidebar {
+            width: 245px;
+            min-width: 245px;
+            background: #172554;
+            color: white;
+            border-radius: 12px;
+            padding: 20px 12px;
+            position: sticky;
+            top: 82px;
+            height: calc(100vh - 92px);
+            overflow-y: auto;
+            align-self: start;
+        }
+
+        .admin-sidebar h3 {
+            color: white;
+            margin: 4px 10px 18px;
+            font-size: 18px;
+        }
+
+        .admin-sidebar-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .admin-sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        .admin-sidebar-menu a:hover,
+        .admin-sidebar-menu a.active {
+            background: #1e40af;
+            color: white;
+        }
+
+        .admin-icon {
+            width: 23px;
+            text-align: center;
+            font-size: 17px;
+        }
+
+        .admin-main {
+            min-width: 0;
+            padding: 5px 0 25px;
+        }
+
+        /* =========================================
+           MAIN CONTENT
+        ========================================= */
+
+        .student-main {
+            flex: 1;
+            min-width: 0;
+            padding: 30px;
+        }
+
+        .page-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            min-height: 65vh;
+        }
+
+        /* =========================================
+           COMMON COMPONENTS
+        ========================================= */
+
+        .button {
+            display: inline-block;
+            padding: 11px 18px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .button:hover {
+            background: var(--primary-dark);
+        }
+
+        .button-secondary {
+            background: #475569;
+        }
+
+        .card {
+            background: var(--surface);
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04);
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        /* =========================================
+           PUBLIC LAYOUT
+        ========================================= */
+
+        .public-layout {
+            min-height: 65vh;
+        }
+
+        .public-main {
+            width: 100%;
+            padding: 30px;
+        }
+
+        /* =========================================
+           FOOTER
+        ========================================= */
+
+        .site-footer {
+            padding: 20px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        /* =========================================
+           RESPONSIVE DESIGN
+        ========================================= */
+
+        @media (max-width: 768px) {
+
+            .site-header {
+                gap: 12px;
+                flex-wrap: wrap;
+                padding: 12px 15px;
+                min-height: 65px;
+            }
+
+            .brand {
+                font-size: 17px;
+            }
+
+            .header-right {
+                flex: 1 1 auto;
+                justify-content: flex-end;
+            }
+
+            .student-name {
+                display: none;
+            }
+
+            .logout-button {
+                padding: 9px 12px;
+            }
+
+            .student-layout {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                padding: 12px;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .sidebar-heading {
+                display: none;
+            }
+
+            .sidebar-menu {
+                flex-direction: row;
+                overflow-x: auto;
+                gap: 8px;
+            }
+
+            .sidebar-menu a {
+                flex-shrink: 0;
+                padding: 10px 12px;
+                font-size: 12px;
+            }
+
+            .menu-icon {
+                display: none;
+            }
+
+            .student-main {
+                padding: 18px 12px;
+            }
+
+            .admin-layout {
+                grid-template-columns: 1fr;
+                gap: 14px;
+                padding: 16px 12px;
+            }
+
+            .admin-sidebar {
+                position: static;
+                width: 100%;
+                min-width: 0;
+                height: auto;
+                overflow: visible;
+            }
+
+            .admin-sidebar-menu {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .admin-main {
+                width: 100%;
+                padding: 10px 0;
+            }
+
+            .public-main {
+                padding: 18px 12px;
+            }
+
+            .navbar {
+                gap: 8px;
+            }
+
+            .nav-btn {
+                min-width: 0;
+                padding: 9px 12px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 420px) {
+
+            .site-header {
+                justify-content: center;
+            }
+
+            .brand {
+                width: 100%;
+                text-align: center;
+            }
+
+            .header-right {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .navbar {
+                width: 100%;
+                gap: 7px;
+            }
+
+            .nav-btn {
+                flex: 1 1 auto;
+                padding: 9px 8px;
+                font-size: 11px;
+            }
+        }
+
+        .admin-sidebar::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .admin-sidebar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        /* =========================================
+           GLOBAL TOAST NOTIFICATIONS
+        ========================================= */
+
+        .toast-container {
+            position: fixed;
+            top: 90px;
+            right: 25px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: min(380px, calc(100vw - 30px));
+            pointer-events: none;
+        }
+
+        .toast {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px 17px;
+            border-radius: 10px;
+            background: #ffffff;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.13);
+            border-left: 5px solid #2563eb;
+            pointer-events: auto;
+            animation: toastSlideIn 0.3s ease;
+        }
+
+        .toast.success {
+            border-left-color: #16a34a;
+        }
+
+        .toast.error {
+            border-left-color: #dc2626;
+        }
+
+        .toast.warning {
+            border-left-color: #eab308;
+        }
+
+        .toast.info {
+            border-left-color: #2563eb;
+        }
+
+        .toast-icon {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .toast.success .toast-icon {
+            color: #16a34a;
+        }
+
+        .toast.error .toast-icon {
+            color: #dc2626;
+        }
+
+        .toast.warning .toast-icon {
+            color: #ca8a04;
+        }
+
+        .toast.info .toast-icon {
+            color: #2563eb;
+        }
+
+        .toast-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .toast-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #172554;
+            margin-bottom: 2px;
+        }
+
+        .toast-message {
+            font-size: 13px;
+            color: #64748b;
+            overflow-wrap: anywhere;
+        }
+
+        .toast-close {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .toast-close:hover {
+            color: #1e293b;
+        }
+
+        .toast.hide {
+            animation: toastSlideOut 0.3s ease forwards;
+        }
+
+        @keyframes toastSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes toastSlideOut {
+            to {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .toast-container {
+                right: 15px;
+                top: 75px;
+            }
+        }
+
+    </style>
+
+    {% block head %}{% endblock %}
+
+</head>
+
+<body>
+
+    <!-- GLOBAL TOAST CONTAINER -->
+
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- TOP HEADER -->
+
+    <header class="site-header">
+
+        <a class="brand" href="{{ url_for('home') }}">
+            Student Voting System
+        </a>
+
+        <div class="header-right">
+
+            {% if session.get('admin_id') %}
+
+            <span class="student-name">
+                {{ session.get('admin_username', 'Admin') }}
+            </span>
+
+            <form method="POST"
+                  action="{{ url_for('admin_auth.logout') }}"
+                  style="margin: 0;">
+
+                <button type="submit" class="logout-button">
+                    Logout
+                </button>
+
+            </form>
+
+            {% elif session.get('student_id') %}
+
+            <span class="student-name">
+                {{ session.get('reg_no', 'Student') }}
+            </span>
+
+            <form method="POST"
+                  action="{{ url_for('auth.logout') }}"
+                  style="margin: 0;">
+
+                <button type="submit" class="logout-button">
+                    Logout
+                </button>
+
+            </form>
+
+            {% else %}
+
+            <!-- PUBLIC NAVIGATION BUTTONS -->
+
+            <nav class="navbar" aria-label="Main navigation">
+
+                <a href="{{ url_for('home') }}"
+                   class="nav-btn home-btn">
+
+                    <span aria-hidden="true">⌂</span>
+                    Home
+
+                </a>
+
+                <a href="{{ url_for('auth.login') }}"
+                   class="nav-btn student-btn">
+
+                    <span aria-hidden="true">🎓</span>
+                    Student Login
+
+                </a>
+
+                <a href="{{ url_for('admin_auth.login') }}"
+                   class="nav-btn admin-btn">
+
+                    <span aria-hidden="true">🔐</span>
+                    Admin Login
+
+                </a>
+
+            </nav>
+
+            {% endif %}
+
+        </div>
+
+    </header>
+
+
+    <!-- =========================================
+         ADMIN LAYOUT
+    ========================================== -->
+
+    {% if session.get('admin_id') %}
+
+    <div class="admin-layout">
+
+        <aside class="admin-sidebar">
+
+            <h3>Admin Menu</h3>
+
+            <nav class="admin-sidebar-menu">
+
+                <a href="{{ url_for('admin_dashboard.dashboard') }}"
+                   class="{% if request.endpoint == 'admin_dashboard.dashboard' %}active{% endif %}">
+
+                    <span class="admin-icon">📊</span>
+                    Dashboard
+
+                </a>
+
+                <a href="{{ url_for('admin_dashboard.student_list') }}"
+                   class="{% if request.endpoint == 'admin_dashboard.student_list' %}active{% endif %}">
+
+                    <span class="admin-icon">👨‍🎓</span>
+                    Students
+
+                </a>
+
+                <a href="{{ url_for('admin_dashboard.candidates_page') }}"
+                   class="{% if request.endpoint == 'admin_dashboard.candidates_page' %}active{% endif %}">
+
+                    <span class="admin-icon">🗳️</span>
+                    Elections
+
+                </a>
+
+                <a href="{{ url_for('admin_dashboard.add_election_page') }}"
+                   class="{% if request.endpoint in ['admin_dashboard.add_election_page', 'admin_dashboard.create_election'] %}active{% endif %}">
+
+                    <span class="admin-icon">➕</span>
+                    Add Election
+
+                </a>
+
+                <a href="{{ url_for('student_import.import_students') }}"
+                   class="{% if request.endpoint == 'student_import.import_students' %}active{% endif %}">
+
+                    <span class="admin-icon">📥</span>
+                    Import Students
+
+                </a>
+
+                <a href="{{ url_for('admin_dashboard.candidate_applications') }}"
+                   class="{% if request.endpoint in ['admin_dashboard.candidate_applications', 'admin_dashboard.approve_candidate_application', 'admin_dashboard.reject_candidate_application'] %}active{% endif %}">
+
+                    <span class="admin-icon">📝</span>
+                    Candidate Applications
+
+                </a>
+
+                <a href="{{ url_for('admin_dashboard.manage_voters') }}"
+                   class="{% if request.endpoint == 'admin_dashboard.manage_voters' %}active{% endif %}">
+
+                    <span class="admin-icon">👥</span>
+                    Manage Voters
+
+                </a>
+
+                <a href="{{ url_for('admin_dashboard.manage_draft_elections') }}"
+                   class="{% if request.endpoint == 'admin_dashboard.manage_draft_elections' %}active{% endif %}">
+
+                    <span class="admin-icon">📋</span>
+                    Manage Draft Elections
+
+                </a>
+
+                <a href="{{ url_for('results.admin_results') }}">
+
+                    <span class="admin-icon">📊</span>
+                    Election Results
+
+                </a>
+
+                <a href="{{ url_for('admin_dashboard.dashboard') }}#results-reports">
+
+                    <span class="admin-icon">📈</span>
+                    Reports
+
+                </a>
+
+            </nav>
+
+        </aside>
+
+        <main class="admin-main">
+
+            <div class="page-container">
+
+                {% block admin_content %}{% endblock %}
+
+            </div>
+
+        </main>
+
+    </div>
+
+
+    <!-- =========================================
+         STUDENT LAYOUT
+    ========================================== -->
+
+    {% elif session.get('student_id') %}
+
+    <div class="student-layout">
+
+        <aside class="sidebar">
+
+            <div class="sidebar-heading">
+                STUDENT MENU
+            </div>
+
+            <nav class="sidebar-menu">
+
+                <a href="{{ url_for('auth.dashboard') }}"
+                   class="{% if request.endpoint == 'auth.dashboard' %}active{% endif %}">
+
+                    <span class="menu-icon">🏠</span>
+                    Dashboard
+
+                </a>
+
+                <a href="{{ url_for('voting.elections') }}"
+                   class="{% if request.endpoint == 'voting.elections' %}active{% endif %}">
+
+                    <span class="menu-icon">🗳️</span>
+                    View Elections
+
+                </a>
+
+                <a href="{{ url_for('auth.candidate_application') }}"
+                   class="{% if request.endpoint == 'auth.candidate_application' %}active{% endif %}">
+
+                    <span class="menu-icon">📝</span>
+                    Register as Candidate
+
+                </a>
+
+                <a href="{{ url_for('auth.my_candidate_applications') }}"
+                   class="{% if request.endpoint == 'auth.my_candidate_applications' %}active{% endif %}">
+
+                    <span class="menu-icon">📋</span>
+                    My Applications
+
+                </a>
+
+                <a href="{{ url_for('auth.change_password') }}"
+                   class="{% if request.endpoint == 'auth.change_password' %}active{% endif %}">
+
+                    <span class="menu-icon">🔐</span>
+                    Change Password
+
+                </a>
+
+            </nav>
+
+        </aside>
+
+        <main class="student-main">
+
+            <div class="page-container">
+
+                {% block content %}{% endblock %}
+
+            </div>
+
+        </main>
+
+    </div>
+
+
+    <!-- =========================================
+         PUBLIC LAYOUT
+    ========================================== -->
+
+    {% else %}
+
+    <div class="public-layout">
+
+        <main class="public-main">
+
+            <div class="page-container">
+
+                {% block public_content %}{% endblock %}
+
+            </div>
+
+        </main>
+
+    </div>
+
+    {% endif %}
+
+
+    <!-- =========================================
+         FOOTER
+    ========================================== -->
+
+    <footer class="site-footer">
+
+        &copy; {{ current_year }}
+        Student Voting System. All rights reserved.
+
+    </footer>
+
+
+    <!-- =========================================
+         GLOBAL TOAST JAVASCRIPT
+    ========================================== -->
+
+    <script>
+
+        // =========================================
+        // GLOBAL TOAST NOTIFICATION SYSTEM
+        // =========================================
+
+        function showToast(message, type = "info", duration = 4000) {
+
+            const container = document.getElementById("toastContainer");
+
+            if (!container) return;
+
+            const validTypes = [
+                "success",
+                "error",
+                "warning",
+                "info"
+            ];
+
+            if (!validTypes.includes(type)) {
+                type = "info";
+            }
+
+            const icons = {
+                success: "✓",
+                error: "✕",
+                warning: "!",
+                info: "i"
+            };
+
+            const titles = {
+                success: "Success",
+                error: "Error",
+                warning: "Warning",
+                info: "Information"
+            };
+
+            const toast = document.createElement("div");
+
+            toast.className = `toast ${type}`;
+
+            const icon = document.createElement("span");
+            icon.className = "toast-icon";
+            icon.textContent = icons[type];
+
+            const content = document.createElement("div");
+            content.className = "toast-content";
+
+            const title = document.createElement("div");
+            title.className = "toast-title";
+            title.textContent = titles[type];
+
+            const text = document.createElement("div");
+            text.className = "toast-message";
+            text.textContent = String(message);
+
+            const close = document.createElement("button");
+            close.className = "toast-close";
+            close.type = "button";
+            close.textContent = "×";
+            close.setAttribute(
+                "aria-label",
+                "Close notification"
+            );
+
+            content.appendChild(title);
+            content.appendChild(text);
+
+            toast.appendChild(icon);
+            toast.appendChild(content);
+            toast.appendChild(close);
+
+            container.appendChild(toast);
+
+            let hideTimer;
+
+            function removeToast() {
+
+                clearTimeout(hideTimer);
+
+                if (!toast.isConnected) return;
+
+                toast.classList.add("hide");
+
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }
+
+            close.addEventListener("click", removeToast);
+
+            hideTimer = setTimeout(removeToast, duration);
+        }
+
+
+        // =========================================
+        // DISPLAY FLASK FLASH MESSAGES
+        // =========================================
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const flashMessages = {{ get_flashed_messages(with_categories=true) | tojson }};
+
+            flashMessages.forEach(([category, message]) => {
+
+                let type = String(category).toLowerCase();
+
+                if (![
+                    "success",
+                    "error",
+                    "warning",
+                    "info"
+                ].includes(type)) {
+                    type = "info";
+                }
+
+                showToast(message, type);
+
+            });
+
+        });
+
+
+        // =========================================
+        // REPLACE JAVASCRIPT ALERT WITH TOAST
+        // =========================================
+
+        window.alert = function (message) {
+            showToast(String(message), "info");
+        };
+
+    </script>
+
+    {% block scripts %}{% endblock %}
+
+</body>
+
+</html>

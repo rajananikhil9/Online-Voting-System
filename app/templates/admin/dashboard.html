@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard | Student Voting System{% endblock %}
+
+{% block head %}
+<style>
+    /* Admin dashboard overview only. Shared header and sidebar stay in base.html. */
+    .admin-dashboard-page {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .admin-dashboard-page .dashboard-heading {
+        margin: 0 0 22px;
+        color: #172554;
+    }
+
+    .admin-dashboard-page .dashboard-heading h2 {
+        margin: 0 0 6px;
+        font-size: 28px;
+    }
+
+    .admin-dashboard-page .dashboard-heading p {
+        margin: 0;
+        color: #64748b;
+        line-height: 1.5;
+    }
+
+    .admin-dashboard-page .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+    .admin-dashboard-page .stat-card {
+        min-width: 0;
+        background: #fff;
+        border-left: 5px solid #2563eb;
+        border-radius: 14px;
+        padding: 22px 24px;
+        box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
+    }
+
+    .admin-dashboard-page .stat-card span {
+        display: block;
+        margin-bottom: 10px;
+        color: #64748b;
+        font-size: 15px;
+    }
+
+    .admin-dashboard-page .stat-card strong {
+        display: block;
+        color: #172554;
+        font-size: 32px;
+        line-height: 1.2;
+        overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 1100px) {
+        .admin-dashboard-page .stats-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 600px) {
+        .admin-dashboard-page .dashboard-heading h2 {
+            font-size: 23px;
+        }
+
+        .admin-dashboard-page .stats-grid {
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+
+        .admin-dashboard-page .stat-card {
+            padding: 18px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="admin-dashboard-page">
+    <div class="dashboard-heading">
+        <h2>Dashboard Overview</h2>
+        <p>View a summary of your student voting system.</p>
+    </div>
+
+    <section class="stats-grid" aria-label="Voting system statistics">
+        <div class="stat-card">
+            <span>Total Students</span>
+            <strong>{{ total_students|default(students|length if students is defined else 0) }}</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>Total Elections</span>
+            <strong>{{ total_elections|default(elections|length if elections is defined else 0) }}</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>Total Candidates</span>
+            <strong>{{ total_candidates|default((candidates_by_election.values()|map('length')|sum) if candidates_by_election is defined else 0) }}</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>Total Votes Cast</span>
+            <strong>{{ total_votes|default(0) }}</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>Active Elections</span>
+            <strong>{{ active_elections|default(0) }}</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>Upcoming Elections</span>
+            <strong>{{ upcoming_elections|default(0) }}</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>Completed Elections</span>
+            <strong>{{ completed_elections|default(0) }}</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>Voter Turnout</span>
+            <strong>{{ voter_turnout|default(0) }}%</strong>
+        </div>
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,335 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard | Student Voting System{% endblock %}
+
+{% block head %}
+<style>
+    .dashboard {
+        width: 100%;
+        color: #1e293b;
+    }
+
+    .welcome {
+        margin-bottom: 25px;
+    }
+
+    .welcome h2 {
+        margin-bottom: 8px;
+        font-size: 28px;
+    }
+
+    .muted {
+        color: #64748b;
+        line-height: 1.6;
+    }
+
+    /* Statistics */
+
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 24px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(15, 23, 42, 0.06);
+        border-top: 4px solid #2563eb;
+    }
+
+    .stat-card h3 {
+        margin: 0 0 12px;
+        color: #64748b;
+        font-size: 15px;
+        font-weight: normal;
+    }
+
+    .stat-card p {
+        font-size: 34px;
+        font-weight: bold;
+        margin: 0;
+        color: #2563eb;
+    }
+
+    /* Cards */
+
+    .card {
+        background: white;
+        padding: 25px;
+        margin-bottom: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(15, 23, 42, 0.06);
+    }
+
+    .card h2 {
+        margin-top: 0;
+        margin-bottom: 20px;
+    }
+
+    /* Profile Rows */
+
+    .profile-row {
+        padding: 15px 0;
+        border-bottom: 1px solid #e2e8f0;
+        overflow-wrap: anywhere;
+    }
+
+    .profile-row:last-child {
+        border-bottom: none;
+    }
+
+    .profile-row strong {
+        display: inline-block;
+        width: 190px;
+        color: #334155;
+    }
+
+    /* Election Cards */
+
+    .election-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 18px;
+        background: #ffffff;
+    }
+
+    .election-card h3 {
+        margin: 0 0 12px;
+        font-size: 20px;
+        color: #1e293b;
+    }
+
+    .election-details {
+        color: #64748b;
+        line-height: 1.8;
+        margin-bottom: 12px;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        margin: 5px 5px 5px 0;
+    }
+
+    .upcoming {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .ongoing {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .completed {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .voted {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .not-voted {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .no-election {
+        padding: 20px;
+        background: #f8fafc;
+        border-radius: 8px;
+        color: #64748b;
+        text-align: center;
+    }
+
+    /* Responsive */
+
+    @media (max-width: 600px) {
+        .welcome h2 {
+            font-size: 23px;
+        }
+
+        .card,
+        .stat-card {
+            padding: 18px;
+        }
+
+        .profile-row strong {
+            display: block;
+            width: auto;
+            margin-bottom: 6px;
+        }
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="dashboard">
+
+    <!-- Welcome -->
+
+    <section class="welcome">
+
+        <h2>Welcome, {{ student.name }}!</h2>
+
+        <p class="muted">
+            Manage your voting activities from your personal dashboard.
+        </p>
+
+    </section>
+
+
+    <!-- Statistics -->
+
+    <section class="stats">
+
+        <div class="stat-card">
+            <h3>Ongoing Elections</h3>
+            <p>{{ ongoing_count }}</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Completed Elections</h3>
+            <p>{{ completed_count }}</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Elections Voted In</h3>
+            <p>{{ voted_count }}</p>
+        </div>
+
+    </section>
+
+
+    <!-- Student Profile -->
+
+    <section class="card">
+
+        <h2>My Profile</h2>
+
+        <div class="profile-row">
+            <strong>Full Name</strong>
+            <span>{{ student.name }}</span>
+        </div>
+
+        <div class="profile-row">
+            <strong>Registration Number</strong>
+            <span>{{ student.reg_no }}</span>
+        </div>
+
+        <div class="profile-row">
+            <strong>Email Address</strong>
+            <span>{{ student.email or "Not provided" }}</span>
+        </div>
+
+        <div class="profile-row">
+            <strong>Department</strong>
+            <span>{{ student.department or "Not provided" }}</span>
+        </div>
+
+    </section>
+
+
+    <!-- Available Elections -->
+
+    <section class="card">
+
+        <h2>My Elections</h2>
+
+        <p class="muted">
+            Elections assigned to you by the administrator.
+        </p>
+
+        {% if available_elections %}
+
+            {% for item in available_elections %}
+
+                <div class="election-card">
+
+                    <h3>{{ item.election.title }}</h3>
+
+                    <p class="muted">
+                        {{ item.election.description or "No description available." }}
+                    </p>
+
+                    <div class="election-details">
+
+                        <div>
+                            <strong>Start:</strong>
+                            {{ item.election.start_at.strftime("%d %B %Y, %I:%M %p") }}
+                        </div>
+
+                        <div>
+                            <strong>End:</strong>
+                            {{ item.election.end_at.strftime("%d %B %Y, %I:%M %p") }}
+                        </div>
+
+                    </div>
+
+                    <!-- Election Status -->
+
+                    {% if item.election_state == "Upcoming" %}
+
+                        <span class="status-badge upcoming">
+                            Upcoming
+                        </span>
+
+                    {% elif item.election_state == "Ongoing" %}
+
+                        <span class="status-badge ongoing">
+                            Ongoing
+                        </span>
+
+                    {% elif item.election_state == "Completed" %}
+
+                        <span class="status-badge completed">
+                            Completed
+                        </span>
+
+                    {% endif %}
+
+
+                    <!-- Voting Status -->
+
+                    {% if item.has_voted %}
+
+                        <span class="status-badge voted">
+                            Vote Recorded
+                        </span>
+
+                    {% else %}
+
+                        <span class="status-badge not-voted">
+                            Not Yet Voted
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="no-election">
+                <p>No elections have been assigned to you yet.</p>
+            </div>
+
+        {% endif %}
+
+    </section>
+
+</div>
+
+{% endblock %}

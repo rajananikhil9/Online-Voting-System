@@ -1,0 +1,441 @@
+{% extends "base.html" %}
+
+{% block title %}Election Results | Admin{% endblock %}
+
+{% block head %}
+<style>
+    .results-container {
+        padding: 25px;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .page-header h2 {
+        font-size: 26px;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .page-header p {
+        color: #64748b;
+        margin-top: 6px;
+    }
+
+    .filter-card {
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .filter-form {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .filter-form select {
+        flex: 1;
+        min-width: 220px;
+        padding: 12px;
+        border: 1px solid #dbe2ea;
+        border-radius: 8px;
+        outline: none;
+        font-size: 14px;
+    }
+
+    .filter-button {
+        padding: 12px 22px;
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .filter-button:hover {
+        background: #1d4ed8;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        gap: 18px;
+        margin-bottom: 25px;
+    }
+
+    .summary-card {
+        background: white;
+        padding: 22px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        border-left: 4px solid #2563eb;
+    }
+
+    .summary-card h4 {
+        color: #64748b;
+        font-size: 14px;
+        font-weight: 500;
+        margin: 0 0 12px;
+    }
+
+    .summary-card h2 {
+        color: #1e293b;
+        font-size: 27px;
+        margin: 0;
+    }
+
+    .section-card {
+        background: white;
+        padding: 22px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .position-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+
+    .position-header h3 {
+        margin: 0;
+        color: #334155;
+        font-size: 17px;
+    }
+
+    .position-total {
+        font-size: 13px;
+        color: #64748b;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    .results-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 650px;
+    }
+
+    .results-table th {
+        background: #f8fafc;
+        color: #475569;
+        font-size: 13px;
+        text-align: left;
+        padding: 14px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .results-table td {
+        padding: 15px 14px;
+        border-bottom: 1px solid #f1f5f9;
+        color: #334155;
+        font-size: 14px;
+    }
+
+    .results-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .candidate-name {
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .vote-count {
+        font-weight: 700;
+    }
+
+    .progress-container {
+        width: 150px;
+        height: 8px;
+        background: #e2e8f0;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background: #2563eb;
+        border-radius: 20px;
+    }
+
+    .percentage {
+        font-weight: 600;
+        color: #475569;
+    }
+
+    .winner-badge {
+        display: inline-block;
+        padding: 5px 10px;
+        background: #dcfce7;
+        color: #15803d;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .no-winner {
+        display: inline-block;
+        padding: 5px 10px;
+        background: #f1f5f9;
+        color: #64748b;
+        border-radius: 20px;
+        font-size: 12px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 45px 20px;
+        color: #64748b;
+    }
+
+    .empty-state h3 {
+        color: #334155;
+        margin-bottom: 8px;
+    }
+
+    @media(max-width: 600px) {
+        .results-container {
+            padding: 15px;
+        }
+
+        .page-header h2 {
+            font-size: 22px;
+        }
+
+        .filter-button {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+
+{% block admin_content %}
+
+<div class="results-container">
+
+    <div class="page-header">
+        <div>
+            <h2>Election Results</h2>
+            <p>View election performance and candidate-wise voting results.</p>
+        </div>
+    </div>
+
+    <!-- Election Selection -->
+    <div class="filter-card">
+
+        <form method="GET"
+              action="{{ url_for('results.admin_results') }}"
+              class="filter-form">
+
+            <select name="election_id" required>
+
+                <option value="">Select Election</option>
+
+                {% for election in elections %}
+
+                <option value="{{ election.id }}"
+                    {% if selected_election and selected_election.id == election.id %}
+                        selected
+                    {% endif %}>
+
+                    {{ election.title }} (ID: {{ election.id }})
+
+                </option>
+
+                {% endfor %}
+
+            </select>
+
+            <button type="submit" class="filter-button">
+                View Results
+            </button>
+
+        </form>
+
+    </div>
+
+
+    {% if selected_election %}
+
+    <!-- Election Summary -->
+    <div class="summary-grid">
+
+        <div class="summary-card">
+            <h4>Total Eligible Voters</h4>
+            <h2>{{ total_voters | default(0) }}</h2>
+        </div>
+
+        <div class="summary-card">
+            <h4>Total Votes Cast</h4>
+            <h2>{{ total_votes | default(0) }}</h2>
+        </div>
+
+        <div class="summary-card">
+            <h4>Voting Participation</h4>
+            <h2>{{ participation | default(0) }}%</h2>
+        </div>
+
+        <div class="summary-card">
+            <h4>Election Status</h4>
+            <h2 style="font-size:20px; text-transform:capitalize;">
+                {{ selected_election.status }}
+            </h2>
+        </div>
+
+    </div>
+
+
+    <!-- Position-wise Results -->
+    {% if results %}
+
+        {% for position, candidates in results.items() %}
+
+        <div class="section-card">
+
+            <div class="position-header">
+
+                <h3>{{ position }}</h3>
+
+                <span class="position-total">
+                    Total Votes:
+                    {{ candidates | sum(attribute='votes') }}
+                </span>
+
+            </div>
+
+            <div class="table-wrapper">
+
+                <table class="results-table">
+
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Candidate Name</th>
+                            <th>Votes</th>
+                            <th>Vote Share</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for candidate in candidates %}
+
+                        <tr>
+
+                            <td>{{ loop.index }}</td>
+
+                            <td class="candidate-name">
+                                {{ candidate.name }}
+                            </td>
+
+                            <td class="vote-count">
+                                {{ candidate.votes }}
+                            </td>
+
+                            <td>
+
+                                <div style="display:flex; align-items:center; gap:10px;">
+
+                                    <div class="progress-container">
+
+                                        <div class="progress-bar"
+                                             style="width:{{ candidate.percentage }}%;">
+                                        </div>
+
+                                    </div>
+
+                                    <span class="percentage">
+                                        {{ candidate.percentage }}%
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+                            <td>
+
+                                {% if candidate.is_winner %}
+
+                                    <span class="winner-badge">
+                                        🏆 Winner
+                                    </span>
+
+                                {% elif candidate.votes > 0 and candidate.votes == candidates[0].votes and candidates | selectattr('votes', 'equalto', candidate.votes) | list | length > 1 %}
+
+                                    <span class="no-winner">
+                                        Tie
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="no-winner">
+                                        Candidate
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="section-card">
+            <div class="empty-state">
+                <h3>No Results Available</h3>
+                <p>No candidate voting results are available for this election.</p>
+            </div>
+        </div>
+
+    {% endif %}
+
+
+    {% else %}
+
+    <div class="section-card">
+
+        <div class="empty-state">
+            <h3>Select an Election</h3>
+            <p>Select an election above to view its results.</p>
+        </div>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
